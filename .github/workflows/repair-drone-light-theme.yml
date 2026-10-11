@@ -3,7 +3,7 @@ name: Repair drone light theme
 on:
   push:
     branches:
-      - codex/connection-check-20261011
+      - main
 
 permissions:
   contents: write
