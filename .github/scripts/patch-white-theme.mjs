@@ -33,6 +33,24 @@ body.light .navBtn.on {
   border-color: var(--line2) !important;
   color: var(--text) !important;
 }
+body.light .opt {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+body.light .opt .num { color: var(--muted) !important; }
+body.light .opt.sel {
+  background: var(--blueBg) !important;
+  border-color: var(--accent) !important;
+}
+body.light .opt.correct {
+  background: var(--greenBg) !important;
+  border-color: var(--ok) !important;
+}
+body.light .opt.wrong {
+  background: var(--redBg) !important;
+  border-color: var(--bad) !important;
+}
 `;
 // The srcdoc stores HTML tags entity-escaped, but CSS inside a style element must remain plain CSS.
 const injectedCss = css;
