@@ -102,6 +102,30 @@ button,input,textarea,select{font:inherit}button{border:0;color:inherit;backgrou
 .mobileBadge{display:inline-block;font-size:10px;border:1px solid var(--line2);border-radius:999px;padding:2px 6px;color:var(--muted);margin-right:3px}
 @media(max-width:420px){.mobileFilterGrid{grid-template-columns:1fr}.launchHero h2{font-size:19px}.appTile{padding:11px}.miniStat b{font-size:17px}}
 
+
+/* CODEX_WHITE_THEME_FIX_V1: restore light surfaces in sticky navigation and quiz header */
+body.light .top,
+body.light .quizHeader {
+  background: rgba(255,255,255,.97) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+  backdrop-filter: blur(10px);
+}
+body.light .bottomNav,
+body.light .mobileNav {
+  background: rgba(255,255,255,.98) !important;
+  color: var(--text) !important;
+  border-top-color: var(--line) !important;
+  backdrop-filter: blur(12px);
+}
+body.light .topVer,
+body.light .ver { color: var(--muted) !important; }
+body.light .navBtn { color: var(--muted) !important; }
+body.light .navBtn.on {
+  background: var(--panel2) !important;
+  border-color: var(--line2) !important;
+  color: var(--text) !important;
+}
 &lt;/style&gt;
 &lt;style id=&quot;force-light-mode&quot;&gt;
 :root{color-scheme:light!important;--bg:#f4f7fa!important;--panel:#fff!important;--panel2:#eef2f6!important;--line:#d5dde5!important;--line2:#b9c5d0!important;--text:#17212b!important;--muted:#5d6b78!important}
