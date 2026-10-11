@@ -22,6 +22,8 @@ jobs:
           node-version: 20
       - name: Apply targeted CSS patch
         run: node .github/scripts/patch-white-theme.mjs
+      - name: Apply visual-only UI refresh
+        run: node .github/scripts/refresh-ui.mjs
       - name: Commit patch if changed
         run: |
           if git diff --quiet -- index.html; then
@@ -31,5 +33,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "v1.1.0: 디자인 시스템, 문제풀이, 오답노트, 통계, 설정 구현"
+          git commit -m "fix: restore full question bank and refresh UI only"
           git push
