@@ -59,6 +59,8 @@ const explanationBlocks = [
   }
 ];
 for (const item of explanationBlocks) {
+  // Important: test and normalize the wrapper before searching for item.old,
+  // because item.old is also a substring inside item.next.
   // Each "next" block intentionally contains the original block. Normalize
   // any wrappers from older runs before checking for the canonical single wrapper.
   const innerAt = item.next.indexOf(item.old);
