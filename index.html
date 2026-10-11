@@ -102,6 +102,27 @@ button,input,textarea,select{font:inherit}button{border:0;color:inherit;backgrou
 .mobileBadge{display:inline-block;font-size:10px;border:1px solid var(--line2);border-radius:999px;padding:2px 6px;color:var(--muted);margin-right:3px}
 @media(max-width:420px){.mobileFilterGrid{grid-template-columns:1fr}.launchHero h2{font-size:19px}.appTile{padding:11px}.miniStat b{font-size:17px}}
 
+&lt;/style&gt;
+&lt;style id=&quot;force-light-mode&quot;&gt;
+:root{color-scheme:light!important;--bg:#f4f7fa!important;--panel:#fff!important;--panel2:#eef2f6!important;--line:#d5dde5!important;--line2:#b9c5d0!important;--text:#17212b!important;--muted:#5d6b78!important}
+html,body{background:#f4f7fa!important;color:#17212b!important}
+&lt;/style&gt;
+
+&lt;style id=&quot;forced-white-theme&quot;&gt;
+:root{color-scheme:light!important}
+html,body{background:#f4f7fa!important;color:#17212b!important}
+body{--bg:#f4f7fa;--panel:#fff;--panel2:#eef2f6;--line:#d5dde5;--line2:#b9c5d0;--text:#17212b;--muted:#5d6b78;--blueBg:#e8f1ff;--yellowBg:#fff8d9;--greenBg:#e8f8ee;--redBg:#ffebed;--purpleBg:#f4eaff;--orangeBg:#fff0e5}
+.top{background:rgba(255,255,255,.97)!important;color:#17212b!important;border-bottom:1px solid #d5dde5!important}
+.topVer,.ver{color:#5d6b78!important}
+.sectionTitle,.count,.sourceText{color:#5d6b78!important}
+button,input,textarea,select{color:#17212b}
+input,textarea,select,.setup select{background:#fff!important;color:#17212b!important;border-color:#cbd5e1!important}
+.btn.primary{background:#dbeafe!important;color:#1d4ed8!important;border-color:#93c5fd!important}
+.pageChip{color:#1d4ed8!important;border-color:#93c5fd!important}
+.option,.answerOption,.choice,.qOption,.studyOption{background:#fff!important;color:#17212b!important;border-color:#cbd5e1!important}
+.bottomNav,.bottomBar,.navBottom,.tabbar{background:#fff!important;color:#17212b!important;border-top:1px solid #d5dde5!important}
+&lt;/style&gt;
+&lt;script&gt;document.addEventListener(&#x27;DOMContentLoaded&#x27;,()=&gt;document.body.classList.add(&#x27;light&#x27;));&lt;/script&gt;
 
 /* CODEX_WHITE_THEME_FIX_V1: restore light surfaces in sticky navigation and quiz header */
 body.light .top,
@@ -126,27 +147,6 @@ body.light .navBtn.on {
   border-color: var(--line2) !important;
   color: var(--text) !important;
 }
-&lt;/style&gt;
-&lt;style id=&quot;force-light-mode&quot;&gt;
-:root{color-scheme:light!important;--bg:#f4f7fa!important;--panel:#fff!important;--panel2:#eef2f6!important;--line:#d5dde5!important;--line2:#b9c5d0!important;--text:#17212b!important;--muted:#5d6b78!important}
-html,body{background:#f4f7fa!important;color:#17212b!important}
-&lt;/style&gt;
-
-&lt;style id=&quot;forced-white-theme&quot;&gt;
-:root{color-scheme:light!important}
-html,body{background:#f4f7fa!important;color:#17212b!important}
-body{--bg:#f4f7fa;--panel:#fff;--panel2:#eef2f6;--line:#d5dde5;--line2:#b9c5d0;--text:#17212b;--muted:#5d6b78;--blueBg:#e8f1ff;--yellowBg:#fff8d9;--greenBg:#e8f8ee;--redBg:#ffebed;--purpleBg:#f4eaff;--orangeBg:#fff0e5}
-.top{background:rgba(255,255,255,.97)!important;color:#17212b!important;border-bottom:1px solid #d5dde5!important}
-.topVer,.ver{color:#5d6b78!important}
-.sectionTitle,.count,.sourceText{color:#5d6b78!important}
-button,input,textarea,select{color:#17212b}
-input,textarea,select,.setup select{background:#fff!important;color:#17212b!important;border-color:#cbd5e1!important}
-.btn.primary{background:#dbeafe!important;color:#1d4ed8!important;border-color:#93c5fd!important}
-.pageChip{color:#1d4ed8!important;border-color:#93c5fd!important}
-.option,.answerOption,.choice,.qOption,.studyOption{background:#fff!important;color:#17212b!important;border-color:#cbd5e1!important}
-.bottomNav,.bottomBar,.navBottom,.tabbar{background:#fff!important;color:#17212b!important;border-top:1px solid #d5dde5!important}
-&lt;/style&gt;
-&lt;script&gt;document.addEventListener(&#x27;DOMContentLoaded&#x27;,()=&gt;document.body.classList.add(&#x27;light&#x27;));&lt;/script&gt;
 &lt;/head&gt;
 &lt;body class=&quot;light&quot;&gt;
 &lt;div class=&quot;top&quot;&gt;&lt;div class=&quot;topInner&quot;&gt;&lt;button id=&quot;topBack&quot; class=&quot;topBack&quot; aria-label=&quot;뒤로가기&quot; onclick=&quot;goBack()&quot;&gt;‹&lt;/button&gt;&lt;div class=&quot;topBrand&quot;&gt;&lt;div class=&quot;brand&quot;&gt;드론 3종 시험훈련소&lt;/div&gt;&lt;div id=&quot;crumb&quot; class=&quot;crumb&quot;&gt;홈&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;topTools&quot;&gt;&lt;button class=&quot;topTool&quot; id=&quot;globalSearchButton&quot; onclick=&quot;globalSearch()&quot; aria-label=&quot;검색&quot;&gt;⌕&lt;/button&gt;&lt;button class=&quot;topTool&quot; id=&quot;appsButton&quot; onclick=&quot;openAppHub()&quot; aria-label=&quot;앱 전환&quot; title=&quot;앱 전환&quot;&gt;▦&lt;/button&gt;&lt;div class=&quot;topVer&quot;&gt;DUO&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
