@@ -192,5 +192,25 @@ const styleEnd = html.lastIndexOf("&lt;/style&gt;", headEnd);
 if (styleEnd < newFrameStart) throw new Error("Could not safely locate the embedded drone app's final style closing tag.");
 
 html = html.slice(0, styleEnd) + injectedCss + "\n" + html.slice(styleEnd);
+
+// Fail the workflow if the final embedded app is missing any intended UI fix.
+const verifiedFrameStart = html.indexOf('id="droneFrame"');
+const verifiedRobotFrameStart = html.indexOf('id="robotFrame"', verifiedFrameStart + 1);
+const verifiedDroneSrcdoc = html.slice(verifiedFrameStart, verifiedRobotFrameStart);
+const requiredFinalMarkers = [
+  marker,
+  "body.light .block",
+  "body.light details > summary",
+  "해설 열기 / 닫기",
+  "내가 고른 답 해설 열기 / 닫기"
+];
+for (const required of requiredFinalMarkers) {
+  if (!verifiedDroneSrcdoc.includes(required)) {
+    throw new Error("Final verification failed; missing marker: " + required);
+  }
+}
+if (verifiedDroneSrcdoc.includes('&lt;details class=&quot;note&quot;&gt;')) {
+  throw new Error("Final verification failed; memo UI markup is still present.");
+}
 writeFileSync(path, html, "utf8");
-console.log("Placed the light-theme overrides inside the final embedded drone style element.");
+console.log("Verified: light explanation cards, collapsible explanations, no memo UI; wrote index.html.");
