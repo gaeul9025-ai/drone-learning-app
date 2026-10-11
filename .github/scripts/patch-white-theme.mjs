@@ -59,14 +59,31 @@ const explanationBlocks = [
   }
 ];
 for (const item of explanationBlocks) {
+  // Each "next" block intentionally contains the original block. Normalize
+  // any wrappers from older runs before checking for the canonical single wrapper.
+  const innerAt = item.next.indexOf(item.old);
+  if (innerAt < 0) throw new Error("Invalid explanation wrapper definition.");
+  const prefix = item.next.slice(0, innerAt);
+  const suffix = item.next.slice(innerAt + item.old.length);
+  let normalized = true;
+  while (normalized) {
+    normalized = false;
+    for (let depth = 12; depth >= 2; depth--) {
+      const repeated = prefix.repeat(depth) + item.old + suffix.repeat(depth);
+      const atRepeated = html.indexOf(repeated, frameStart0);
+      if (atRepeated >= frameStart0 && atRepeated < robotFrameStart0) {
+        html = html.slice(0, atRepeated) + item.next + html.slice(atRepeated + repeated.length);
+        normalized = true;
+      }
+    }
+  }
+  const alreadyPatched = html.indexOf(item.next, frameStart0);
+  if (alreadyPatched >= frameStart0 && alreadyPatched < robotFrameStart0) continue;
   const at = html.indexOf(item.old, frameStart0);
   if (at >= frameStart0 && at < robotFrameStart0) {
     html = html.slice(0, at) + item.next + html.slice(at + item.old.length);
   } else {
-    const alreadyPatched = html.indexOf(item.next, frameStart0);
-    if (alreadyPatched < frameStart0 || alreadyPatched >= robotFrameStart0) {
-      throw new Error("Could not find the explanation UI to patch or verify.");
-    }
+    throw new Error("Could not find the explanation UI to patch or verify.");
   }
 }
 const marker = "CODEX_WHITE_THEME_FIX_V1";
@@ -207,6 +224,15 @@ const requiredFinalMarkers = [
 for (const required of requiredFinalMarkers) {
   if (!verifiedDroneSrcdoc.includes(required)) {
     throw new Error("Final verification failed; missing marker: " + required);
+  }
+}
+const countOccurrences = (haystack, needle) => haystack.split(needle).length - 1;
+for (const summary of [
+  '&lt;details class=&quot;explainToggle&quot;&gt;&lt;summary&gt;해설 열기 / 닫기',
+  '&lt;details class=&quot;explainToggle&quot;&gt;&lt;summary&gt;내가 고른 답 해설 열기 / 닫기'
+]) {
+  if (countOccurrences(verifiedDroneSrcdoc, summary) !== 1) {
+    throw new Error("Final verification failed; an explanation toggle is missing or duplicated.");
   }
 }
 if (verifiedDroneSrcdoc.includes('&lt;details class=&quot;note&quot;&gt;')) {
