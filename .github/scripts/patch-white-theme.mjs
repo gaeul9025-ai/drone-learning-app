@@ -2,6 +2,13 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const path = "index.html";
 let html = readFileSync(path, "utf8");
+
+// Normalize generated question display without changing the underlying answer bank.
+const coreNeedle = "function coreQuestion(q){\\n  let s=clean(q.q);";
+const coreReplacement = coreNeedle + "\\n  // Remove the artificial scenario and generic instruction from generated application variants.\\n  if(q&&q.id&&/-app\\\\d+$/.test(q.id)){\\n    const chunks=String(q.q||&quot;&quot;).split(/\\\\n\\\\s*\\\\n/).map(x=>clean(x)).filter(Boolean);\\n    if(chunks.length>=3)s=chunks.slice(2).join(&quot;\\\\n\\\\n&quot;);\\n  }";
+if (html.includes(coreNeedle) && !html.includes("Remove the artificial scenario and generic instruction")) {
+  html = html.replace(coreNeedle, coreReplacement);
+}
 const marker = "CODEX_WHITE_THEME_FIX_V1";
 const frameStart = html.indexOf('id="droneFrame"');
 const robotFrameStart = html.indexOf('id="robotFrame"', frameStart + 1);
@@ -51,6 +58,23 @@ body.light .opt.wrong {
   background: var(--redBg) !important;
   border-color: var(--bad) !important;
 }
+/* CODEX_READABLE_QUESTION_NO_MEMO_V1 */
+body.light .qText,
+body.light .opt,
+body.light .blockBody,
+body.light .blockHead,
+body.light .qRef,
+body.light .sourceText,
+body.light .qMeta,
+body.light .pill {
+  color: #17212b !important;
+  text-shadow: none !important;
+}
+body.light .qText { font-size: 16px !important; line-height: 1.65 !important; font-weight: 750 !important; }
+body.light .opt { font-size: 15px !important; line-height: 1.55 !important; font-weight: 600 !important; }
+body.light .opt .num { color: #364554 !important; }
+body.light .qRef, body.light .sourceText { color: #364554 !important; font-size: 12px !important; }
+.note { display: none !important; }
 `;
 // The srcdoc stores HTML tags entity-escaped, but CSS inside a style element must remain plain CSS.
 const injectedCss = css;
