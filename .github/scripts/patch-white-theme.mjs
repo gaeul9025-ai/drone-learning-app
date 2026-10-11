@@ -1,18 +1,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 const path = "index.html";
-const html = readFileSync(path, "utf8");
+let html = readFileSync(path, "utf8");
 const marker = "CODEX_WHITE_THEME_FIX_V1";
 const frameStart = html.indexOf('id="droneFrame"');
 const robotFrameStart = html.indexOf('id="robotFrame"', frameStart + 1);
-const styleEnd = html.indexOf("&lt;/style&gt;", frameStart);
-
-if (frameStart < 0 || robotFrameStart < 0 || styleEnd < 0 || styleEnd > robotFrameStart) {
-  throw new Error("Could not safely locate the embedded drone app stylesheet.");
-}
-if (html.slice(frameStart, robotFrameStart).includes(marker)) {
-  console.log("White-theme fix already present; no changes made.");
-  process.exit(0);
+if (frameStart < 0 || robotFrameStart < 0) {
+  throw new Error("Could not safely locate the embedded drone app.");
 }
 
 const css = `
@@ -41,6 +35,34 @@ body.light .navBtn.on {
 }
 `;
 const encoded = css.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-const updated = html.slice(0, styleEnd) + encoded + html.slice(styleEnd);
-writeFileSync(path, updated, "utf8");
-console.log("Patched embedded drone app light-theme CSS.");
+
+// Remove our previous insertion, wherever it was, so this remains idempotent.
+const oldPos = html.indexOf(marker, frameStart);
+if (oldPos >= 0 && oldPos < robotFrameStart) {
+  const blockStart = html.lastIndexOf("\n", oldPos);
+  const encodedStart = blockStart >= frameStart ? blockStart : oldPos;
+  const oldBlockEnd = html.indexOf("&lt;/style&gt;", oldPos);
+  const oldHeadEnd = html.indexOf("&lt;/head&gt;", oldPos);
+  if (oldBlockEnd >= 0 && oldBlockEnd < robotFrameStart && (oldHeadEnd < 0 || oldBlockEnd < oldHeadEnd)) {
+    html = html.slice(0, encodedStart) + html.slice(oldBlockEnd);
+  } else {
+    // Fallback for a previous version already placed after all style tags.
+    const markerEnd = html.indexOf("}", html.indexOf("body.light .navBtn.on", oldPos));
+    if (markerEnd < 0 || markerEnd > robotFrameStart) throw new Error("Could not safely remove previous patch.");
+    const end = html.indexOf("\n", markerEnd);
+    html = html.slice(0, encodedStart) + html.slice(end >= 0 ? end + 1 : markerEnd + 1);
+  }
+}
+
+const newFrameStart = html.indexOf('id="droneFrame"');
+const newRobotFrameStart = html.indexOf('id="robotFrame"', newFrameStart + 1);
+const headEnd = html.indexOf("&lt;/head&gt;", newFrameStart);
+if (headEnd < 0 || headEnd > newRobotFrameStart) {
+  throw new Error("Could not safely locate the embedded drone app's closing head tag.");
+}
+const frameContent = html.slice(newFrameStart, newRobotFrameStart);
+if (frameContent.includes(marker)) throw new Error("Previous patch marker remains; refusing to duplicate CSS.");
+
+html = html.slice(0, headEnd) + encoded + html.slice(headEnd);
+writeFileSync(path, html, "utf8");
+console.log("Placed the light-theme overrides after all embedded drone styles.");
