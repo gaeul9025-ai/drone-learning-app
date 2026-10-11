@@ -4,8 +4,8 @@ const path = "index.html";
 let html = readFileSync(path, "utf8");
 
 // Normalize generated question display without changing the underlying answer bank.
-const coreNeedle = "function coreQuestion(q){\\n  let s=clean(q.q);";
-const coreReplacement = coreNeedle + "\\n  // Remove the artificial scenario and generic instruction from generated application variants.\\n  if(q&&q.id&&/-app\\\\d+$/.test(q.id)){\\n    const chunks=String(q.q||&quot;&quot;).split(/\\\\n\\\\s*\\\\n/).map(x=>clean(x)).filter(Boolean);\\n    if(chunks.length>=3)s=chunks.slice(2).join(&quot;\\\\n\\\\n&quot;);\\n  }";
+const coreNeedle = "function coreQuestion(q){\n  let s=clean(q.q);";
+const coreReplacement = coreNeedle + "\n  // Remove the artificial scenario and generic instruction from generated application variants.\n  if(q&&q.id&&/-app\\d+$/.test(q.id)){\n    const chunks=String(q.q||&quot;&quot;).split(/\\n\\s*\\n/).map(x=>clean(x)).filter(Boolean);\n    if(chunks.length>=3)s=chunks.slice(2).join(&quot;\\n\\n&quot;);\n  }";
 if (html.includes(coreNeedle) && !html.includes("Remove the artificial scenario and generic instruction")) {
   html = html.replace(coreNeedle, coreReplacement);
 }
