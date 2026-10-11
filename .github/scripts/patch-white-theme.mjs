@@ -3,6 +3,12 @@ import { readFileSync, writeFileSync } from "node:fs";
 const path = "index.html";
 let html = readFileSync(path, "utf8");
 
+// v1.1.0 owns its UI; do not apply legacy iframe markup patches to it.
+if (html.includes("v110-law-01") && html.includes("id=&quot;quizPage&quot;")) {
+  console.log("v1.1.0 app detected; legacy theme patch is not applicable.");
+  process.exit(0);
+}
+
 // Safely patch the embedded drone app's question and explanation UI.
 const frameStart0 = html.indexOf('id="droneFrame"');
 const robotFrameStart0 = html.indexOf('id="robotFrame"', frameStart0 + 1);
