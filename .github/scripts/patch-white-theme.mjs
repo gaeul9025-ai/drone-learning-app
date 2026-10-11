@@ -23,7 +23,7 @@ replaceFunction("coreQuestion(q){", "explainType(q){", `function coreQuestion(q)
     if(chunks.length > 1) s=chunks[chunks.length-1];
   }
   const parts=s.split(/\\n+/).map(x=>clean(x)).filter(Boolean);
-  if(parts.length > 1 && /^(교재 내용을 기준|다음 상황 또는 설명|핵심 개념을 정확히|비행·학습 현장에서|기체 점검 중|운용 담당자가|점검표에서 최종 판단)/.test(parts[0])) s=parts[parts.length-1];
+  if(parts.length > 1 && /^(교재 내용을 기준|다음 상황 또는 설명|핵심 개념을 정확히|비행·학습 현장에서|기체 점검 중|운용 담당자가|점검표에서 최종 판단|상황을 살펴보면|다음과 같은 상황|다음 사례|현장에서는|현장 점검에서|비행 전 점검에서|점검 과정에서|기체 운용 중|조종자가|운용자가|담당자는|운영자가|작업자가|실습 중|비행 중|비행을 준비하던|확인 결과)/.test(parts[0])) s=parts[parts.length-1];
   s=s.replace(/^비행이론에서 다음 두 선택지\\s*/, '');
   s=s.replace(/^항공기상에서 다음 두 선택지\\s*/, '');
   s=s.replace(/^드론 운용에서 다음 두 선택지\\s*/, '');
@@ -60,7 +60,14 @@ const explanationBlocks = [
 ];
 for (const item of explanationBlocks) {
   const at = html.indexOf(item.old, frameStart0);
-  if (at >= 0 && at < robotFrameStart0) html = html.slice(0, at) + item.next + html.slice(at + item.old.length);
+  if (at >= frameStart0 && at < robotFrameStart0) {
+    html = html.slice(0, at) + item.next + html.slice(at + item.old.length);
+  } else {
+    const alreadyPatched = html.indexOf(item.next, frameStart0);
+    if (alreadyPatched < frameStart0 || alreadyPatched >= robotFrameStart0) {
+      throw new Error("Could not find the explanation UI to patch or verify.");
+    }
+  }
 }
 const marker = "CODEX_WHITE_THEME_FIX_V1";
 const frameStart = html.indexOf('id="droneFrame"');
@@ -128,6 +135,25 @@ body.light .opt { font-size: 15px !important; line-height: 1.55 !important; font
 body.light .opt .num { color: #364554 !important; }
 body.light .qRef, body.light .sourceText { color: #364554 !important; font-size: 12px !important; }
 .note { display: none !important; }
+/* Fix hard-coded dark explanation cards in light mode, not just their text. */
+body.light .block,
+body.light details,
+body.light .explainToggle,
+body.light .bookBlock,
+body.light .optionDetails details {
+  background: #ffffff !important;
+  color: #17212b !important;
+  border-color: #d7dee7 !important;
+}
+body.light .blockHead,
+body.light details > summary,
+body.light .explainToggle > summary {
+  background: #f3f6f9 !important;
+  color: #17212b !important;
+}
+body.light .blockBody,
+body.light .bookBlock .blockBody,
+body.light .oe { color: #17212b !important; }
 .explainToggle { margin-top: 8px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); overflow: hidden; }
 .explainToggle > summary { cursor: pointer; padding: 10px 12px; color: var(--text); font-weight: 800; list-style: none; }
 .explainToggle > summary::-webkit-details-marker { display: none; }
