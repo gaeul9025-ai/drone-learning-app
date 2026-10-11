@@ -34,7 +34,8 @@ body.light .navBtn.on {
   color: var(--text) !important;
 }
 `;
-const encoded = css.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+// The srcdoc stores HTML tags entity-escaped, but CSS inside a style element must remain plain CSS.
+const injectedCss = css;
 
 // Remove our previous insertion, wherever it was, so this remains idempotent.
 const oldPos = html.indexOf(marker, frameStart);
@@ -60,9 +61,11 @@ const headEnd = html.indexOf("&lt;/head&gt;", newFrameStart);
 if (headEnd < 0 || headEnd > newRobotFrameStart) {
   throw new Error("Could not safely locate the embedded drone app's closing head tag.");
 }
-const frameContent = html.slice(newFrameStart, newRobotFrameStart);
+const frameContent = html.slice(newFrameStart, headEnd);
 if (frameContent.includes(marker)) throw new Error("Previous patch marker remains; refusing to duplicate CSS.");
+const styleEnd = html.lastIndexOf("&lt;/style&gt;", headEnd);
+if (styleEnd < newFrameStart) throw new Error("Could not safely locate the embedded drone app's final style closing tag.");
 
-html = html.slice(0, headEnd) + encoded + html.slice(headEnd);
+html = html.slice(0, styleEnd) + injectedCss + "\n" + html.slice(styleEnd);
 writeFileSync(path, html, "utf8");
-console.log("Placed the light-theme overrides after all embedded drone styles.");
+console.log("Placed the light-theme overrides inside the final embedded drone style element.");
