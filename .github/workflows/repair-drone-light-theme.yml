@@ -31,5 +31,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "fix: restore white theme navigation and quiz header"
+          git commit -m "v1.1.0: 디자인 시스템, 문제풀이, 오답노트, 통계, 설정 구현"
           git push
