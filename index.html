@@ -180,6 +180,10 @@ body.light .opt { font-size: 15px !important; line-height: 1.55 !important; font
 body.light .opt .num { color: #364554 !important; }
 body.light .qRef, body.light .sourceText { color: #364554 !important; font-size: 12px !important; }
 .note { display: none !important; }
+.explainToggle { margin-top: 8px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); overflow: hidden; }
+.explainToggle > summary { cursor: pointer; padding: 10px 12px; color: var(--text); font-weight: 800; list-style: none; }
+.explainToggle > summary::-webkit-details-marker { display: none; }
+.explainToggle > .block { margin: 0; border: 0; border-radius: 0; }
 
 &lt;/style&gt;
 &lt;script&gt;document.addEventListener(&#x27;DOMContentLoaded&#x27;,()=&gt;document.body.classList.add(&#x27;light&#x27;));&lt;/script&gt;
@@ -270,21 +274,19 @@ function stageName(q){return q.stageLabel||({&#x27;직접형&#x27;:&#x27;개념&
 function chapterName(q){let c=clean(q.chapter||&#x27;&#x27;);c=c.replace(/^Part [1-5] [^·]+ · /,&#x27;&#x27;);return c||PART_FULL[q.subject]}
 function refName(q){return clean(q.bookRef||q.book||&#x27;교재 기반 문항&#x27;)}
 function coreQuestion(q){
-  let s=clean(q.q);
-  // Remove the artificial scenario and generic instruction from generated application variants.
-  if(q&&q.id&&/-app\d+$/.test(q.id)){
-    const chunks=String(q.q||&quot;&quot;).split(/\n\s*\n/).map(x=>clean(x)).filter(Boolean);
-    if(chunks.length>=3)s=chunks.slice(2).join(&quot;\n\n&quot;);
+  let s=clean(q.q||&#x27;&#x27;);
+  if(q &amp;&amp; /-app\d+$/.test(String(q.id||&#x27;&#x27;))){
+    const chunks=s.split(/\n\s*\n/).map(x=&gt;clean(x)).filter(Boolean);
+    if(chunks.length &gt; 1) s=chunks[chunks.length-1];
   }
   const parts=s.split(/\n+/).map(x=&gt;clean(x)).filter(Boolean);
-  if(parts.length&gt;1 &amp;&amp; /^(교재 내용을 기준|다음 상황 또는 설명|핵심 개념을 정확히|비행·학습 현장에서)/.test(parts[0])) s=parts[parts.length-1];
-  s=s.replace(/^비행이론에서 다음 두 선택지\s*/,&#x27;&#x27;);
-  s=s.replace(/^항공기상에서 다음 두 선택지\s*/,&#x27;&#x27;);
-  s=s.replace(/^드론 운용에서 다음 두 선택지\s*/,&#x27;&#x27;);
-  s=s.replace(/^항공법규에서 다음 두 선택지\s*/,&#x27;&#x27;);
-  s=s.replace(/\s+관해 교재 기준과 맞는 선택은\?$/,&#x27;?&#x27;);
-  s=s.replace(/\s+에 관해 교재 기준과 맞는 선택은\?$/,&#x27;?&#x27;);
-  s=s.replace(/\s+와\s+\S.*?를 비교할 때, 교재 기준에 맞는 것은\?$/,(m)=&gt;m);
+  if(parts.length &gt; 1 &amp;&amp; /^(교재 내용을 기준|다음 상황 또는 설명|핵심 개념을 정확히|비행·학습 현장에서|기체 점검 중|운용 담당자가|점검표에서 최종 판단)/.test(parts[0])) s=parts[parts.length-1];
+  s=s.replace(/^비행이론에서 다음 두 선택지\s*/, &#x27;&#x27;);
+  s=s.replace(/^항공기상에서 다음 두 선택지\s*/, &#x27;&#x27;);
+  s=s.replace(/^드론 운용에서 다음 두 선택지\s*/, &#x27;&#x27;);
+  s=s.replace(/^항공법규에서 다음 두 선택지\s*/, &#x27;&#x27;);
+  s=s.replace(/\s+관해 교재 기준과 맞는 선택은\?$/, &#x27;?&#x27;);
+  s=s.replace(/\s+에 관해 교재 기준과 맞는 선택은\?$/, &#x27;?&#x27;);
   return clean(s);
 }
 function explainType(q){
@@ -316,7 +318,12 @@ function relationReason(q){
   return &#x27;&#x27;;
 }
 function baseQuestionText(q){
-  return clean(q.q||&#x27;&#x27;).replace(/^교재 내용을 기준으로 판단할 때, 다음 중 가장 알맞은 것은\?\s*/,&#x27;&#x27;).replace(/^다음 상황 또는 설명을 교재의 기준에 맞춰 판단하시오\.\s*/,&#x27;&#x27;).replace(/^핵심 개념을 정확히 구분한 것으로 가장 적절한 것은\?\s*/,&#x27;&#x27;).replace(/^비행·학습 현장에서 적용할 때 교재 내용과 일치하는 선택지는\?\s*/,&#x27;&#x27;).trim();
+  return clean(coreQuestion(q))
+    .replace(/^교재 내용을 기준으로 판단할 때, 다음 중 가장 알맞은 것은\?\s*/, &#x27;&#x27;)
+    .replace(/^다음 상황 또는 설명을 교재의 기준에 맞춰 판단하시오\.\s*/, &#x27;&#x27;)
+    .replace(/^핵심 개념을 정확히 구분한 것으로 가장 적절한 것은\?\s*/, &#x27;&#x27;)
+    .replace(/^비행·학습 현장에서 적용할 때 교재 내용과 일치하는 선택지는\?\s*/, &#x27;&#x27;)
+    .trim();
 }
 function conceptText(q){return (q.concepts||[]).filter(x=&gt;!/^Part \d/.test(x)).join(&#x27; · &#x27;)||chapterName(q)}
 function specificExplain(q){
@@ -457,12 +464,12 @@ function renderQuiz(scrollTop){
   &lt;div class=&quot;qMain&quot;&gt;&lt;div class=&quot;qMeta&quot;&gt;&lt;span class=&quot;qNo&quot;&gt;문제 ${session.idx+1}&lt;/span&gt;&lt;span class=&quot;pill&quot;&gt;${state.bookmarks[q.id]?&#x27;북마크됨&#x27;:&#x27;북마크 안 함&#x27;}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;qText&quot;&gt;${esc(coreQuestion(q))}&lt;/div&gt;${q.o.map((o,i)=&gt;`&lt;button class=&quot;opt ${answer===i?&#x27;sel &#x27;:&#x27;&#x27;}${revealed&amp;&amp;i===q.a?&#x27;correct&#x27;:&#x27;&#x27;}${revealed&amp;&amp;answer===i&amp;&amp;answer!==q.a?&#x27;wrong&#x27;:&#x27;&#x27;}&quot; onclick=&quot;answerQ(${i})&quot; ${disabled?&#x27;disabled&#x27;:&#x27;&#x27;}&gt;&lt;span class=&quot;num&quot;&gt;${i+1}&lt;/span&gt;&lt;span&gt;${esc(o)}&lt;/span&gt;&lt;/button&gt;`).join(&#x27;&#x27;)}
   ${session.type!==&#x27;mock&#x27;&amp;&amp;!revealed?&#x27;&lt;button class=&quot;unknownBtn&quot; onclick=&quot;unknownQ()&quot;&gt;모르겠습니다&lt;/button&gt;&#x27;:&#x27;&#x27;}
   ${revealed?`&lt;div class=&quot;answerBar ${unknown?&#x27;unknown&#x27;:answer===q.a?&#x27;good&#x27;:&#x27;bad&#x27;}&quot;&gt;${unknown?&#x27;모름 · 정답을 확인하고 교재로 돌아가 보기&#x27;:answer===q.a?&#x27;정답 · 선택한 보기와 교재 기준이 일치함&#x27;:&#x27;오답 · 선택한 보기와 정답의 기준이 다름&#x27;}${answer!==null?` · 정답 ${answer+1}번`:` · 정답 ${q.a+1}번`}&lt;/div&gt;
-  &lt;div class=&quot;block explainBlock&quot;&gt;&lt;div class=&quot;blockHead&quot;&gt;왜 이렇게 판단하나&lt;/div&gt;&lt;div class=&quot;blockBody&quot;&gt;${esc(readableExplain(q))}&lt;/div&gt;&lt;/div&gt;
-  &lt;div class=&quot;block&quot;&gt;&lt;div class=&quot;blockHead&quot;&gt;내가 고른 답을 다시 보기&lt;/div&gt;&lt;div class=&quot;blockBody&quot;&gt;${esc(selectedExplain(q,answer,unknown))}&lt;/div&gt;&lt;/div&gt;
+  &lt;details class=&quot;explainToggle&quot;&gt;&lt;summary&gt;해설 열기 / 닫기&lt;/summary&gt;&lt;div class=&quot;block explainBlock&quot;&gt;&lt;div class=&quot;blockHead&quot;&gt;왜 이렇게 판단하나&lt;/div&gt;&lt;div class=&quot;blockBody&quot;&gt;${esc(readableExplain(q))}&lt;/div&gt;&lt;/div&gt;&lt;/details&gt;
+  &lt;details class=&quot;explainToggle&quot;&gt;&lt;summary&gt;내가 고른 답 해설 열기 / 닫기&lt;/summary&gt;&lt;div class=&quot;block&quot;&gt;&lt;div class=&quot;blockHead&quot;&gt;내가 고른 답을 다시 보기&lt;/div&gt;&lt;div class=&quot;blockBody&quot;&gt;${esc(selectedExplain(q,answer,unknown))}&lt;/div&gt;&lt;/div&gt;&lt;/details&gt;
   &lt;div class=&quot;block bookBlock&quot;&gt;&lt;div class=&quot;blockHead&quot;&gt;교재에서 다시 볼 곳&lt;/div&gt;&lt;div class=&quot;blockBody&quot;&gt;${esc(PART_FULL[q.subject])} · ${esc(chapterName(q))}\n${esc(pageText(q))} · ${esc(refName(q))}&lt;/div&gt;&lt;/div&gt;
   &lt;div class=&quot;optionDetails&quot;&gt;&lt;details&gt;&lt;summary&gt;보기별 판단 열기&lt;/summary&gt;${q.o.map((o,i)=&gt;`&lt;div class=&quot;oe ${i===q.a?&#x27;ok&#x27;:&#x27;no&#x27;}&quot;&gt;&lt;b&gt;보기 ${i+1}&lt;/b&gt; · ${esc(optionExplain(q,i))}&lt;/div&gt;`).join(&#x27;&#x27;)}&lt;/details&gt;&lt;/div&gt;`:&#x27;&#x27;}
   &lt;div class=&quot;actions&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;toggleBookmark()&quot;&gt;${state.bookmarks[q.id]?&#x27;북마크 해제&#x27;:&#x27;북마크&#x27;}&lt;/button&gt;&lt;button class=&quot;btn&quot; onclick=&quot;jumpQ()&quot;&gt;문제 이동&lt;/button&gt;${session.type!==&#x27;mock&#x27;?`&lt;button class=&quot;btn confBtn ${state.confidence[q.id]===1?&#x27;active&#x27;:&#x27;&#x27;}&quot; onclick=&quot;rateConfidence(1)&quot;&gt;확신 낮음&lt;/button&gt;&lt;button class=&quot;btn confBtn ${state.confidence[q.id]===3?&#x27;active&#x27;:&#x27;&#x27;}&quot; onclick=&quot;rateConfidence(3)&quot;&gt;보통&lt;/button&gt;&lt;button class=&quot;btn confBtn ${state.confidence[q.id]===5?&#x27;active&#x27;:&#x27;&#x27;}&quot; onclick=&quot;rateConfidence(5)&quot;&gt;확신 높음&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;
-  &lt;details class=&quot;note&quot;&gt;&lt;summary&gt;문제 메모&lt;/summary&gt;&lt;textarea id=&quot;noteBox&quot; placeholder=&quot;왜 틀렸는지, 헷갈린 기준, 다시 볼 페이지를 적어둬.&quot;&gt;${esc(state.notes[q.id]||&#x27;&#x27;)}&lt;/textarea&gt;&lt;/details&gt;&lt;/div&gt;&lt;/div&gt;
+  &lt;/div&gt;&lt;/div&gt;
   &lt;div class=&quot;navbar&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;prevQ()&quot; ${session.idx===0?&#x27;disabled&#x27;:&#x27;&#x27;}&gt;이전&lt;/button&gt;&lt;button class=&quot;btn primary&quot; onclick=&quot;nextQ()&quot;&gt;${session.idx===session.qs.length-1?&#x27;제출&#x27;:&#x27;다음&#x27;}&lt;/button&gt;&lt;/div&gt;`;
   renderTimer();
   const note=$(&#x27;noteBox&#x27;);if(note)note.addEventListener(&#x27;input&#x27;,saveNote);
