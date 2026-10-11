@@ -93,7 +93,7 @@ const additions = [
 ].map(([id,subject,question,choices,answer,explanation])=>({id,subject,question,choices,answer,explanation,image:null}));
 const seen = new Set(questions.map(q => q.question.toLowerCase().replace(/\s+/g," ").trim()));
 let appended = 0;
-for (const [id,subject,question,choices,answer,explanation] of additions) {
+for (const {id,subject,question,choices,answer,explanation} of additions) {
   const key = question.toLowerCase().replace(/\s+/g," ").trim();
   if (!seen.has(key)) { questions.push({id,subject,question,choices,answer,explanation,image:null}); seen.add(key); appended++; }
 }
