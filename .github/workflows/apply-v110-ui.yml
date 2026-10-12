@@ -1,0 +1,96 @@
+name: Apply v1.1.0 UI refresh
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/apply-v110-ui.yml"
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Replace visual CSS while preserving question data
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("index.html")
+          before = p.read_text(encoding="utf-8")
+          marker = "/* question-bank-ui-polish: visual-only; preserve question data and behavior */"
+          start = before.find(marker)
+          close = before.find("&lt;/style&gt;", start)
+          if start < 0 or close < 0:
+              raise SystemExit("Expected CSS boundaries not found; refusing unsafe patch")
+          data_start = before.find("const QUESTIONS=")
+          data_end = before.find("];", data_start) + 2
+          original_data = before[data_start:data_end]
+          css = r"""
+          /* v1.1.0 design-system refresh: visual layer only; preserve all existing questions and behavior */
+          :root{--primary:#2563EB;--primary-soft:#EFF4FF;--text:#0F172A;--text-sub:#64748B;--text-mute:#94A3B8;--bg:#F8FAFC;--surface:#FFFFFF;--line:#E2E8F0;--correct:#16A34A;--correct-soft:#F0FDF4;--wrong:#DC2626;--wrong-soft:#FEF2F2;--radius-card:16px;--radius-button:14px;--radius-chip:999px;--shadow:0 1px 2px rgba(15,23,42,.04);--ink:var(--text);--muted:var(--text-sub);--blue:var(--primary);color-scheme:light}
+          html,body{font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+          @media(min-width:481px){body{background:#EEF1F5}.shell,.app-shell,.app{max-width:480px;margin-inline:auto;background:var(--bg)}}
+          button,input,select,textarea{font:inherit}button{transition:background-color .16s ease,border-color .16s ease,color .16s ease,transform .16s ease}button:active{transform:scale(.98)}:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+          #listPanel{padding:0 20px calc(88px + env(safe-area-inset-bottom))}
+          #listPanel .page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:20px 0;background:transparent;border:0;border-radius:0;box-shadow:none}
+          #listPanel .eyebrow{font-size:12px;letter-spacing:.02em;font-weight:600;color:var(--text-sub);margin-bottom:8px}
+          #listPanel .page-head h2{font-size:22px;line-height:1.35;letter-spacing:-.03em;margin:0;font-weight:700;color:var(--text)}
+          #listPanel .search-label{max-width:48%;font-size:13px;line-height:1.4;font-weight:600;color:var(--primary);background:var(--primary-soft);border:0;border-radius:var(--radius-chip);padding:8px 12px;text-align:center}
+          #listPanel .result-count{display:flex!important;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;padding:0;color:var(--text-sub);font-size:13px;font-weight:500}
+          #listPanel .list{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:0}
+          #listPanel .list-card{min-width:0;position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-card);padding:16px;box-shadow:var(--shadow);transition:border-color .16s ease,background-color .16s ease}
+          #listPanel .list-card:active{transform:scale(.98);border-color:var(--primary)}
+          #listPanel .list-card :is(.question,.question-text,.q-text,.title){font-size:15px;line-height:1.65;letter-spacing:0;overflow-wrap:anywhere;word-break:keep-all}
+          #listPanel .list-card :is(.muted,.meta,.category,.small){color:var(--text-sub);font-size:13px}
+          #listPanel .list-card button{min-height:44px;border-radius:var(--radius-button)}
+          #listPanel .list-card :is(.badge,.tag,.chip){border-radius:var(--radius-chip);font-weight:600}
+          #listPanel .empty{margin-top:12px;padding:24px 16px;border:1px solid var(--line);border-radius:var(--radius-card);background:var(--surface);color:var(--text-sub);text-align:center}
+          .page-head{padding-inline:20px}.view-section{background:var(--bg)}
+          :is(.dashboard-card,.home-hero,.exam-card,.exam-item,.stat-card,.list-card,.question-card,.content-card){border-radius:var(--radius-card);box-shadow:var(--shadow)}
+          :is(.dashboard-card,.home-hero,.exam-card,.exam-item,.stat-card,.content-card){background:var(--surface);border:1px solid var(--line);color:var(--text)}
+          :is(.dashboard-card,.home-hero,.exam-card,.exam-item,.stat-card,.content-card) :is(h1,h2,h3,p,span,strong,small){color:inherit}
+          :is(.tabs .btn,.tab,.chip,.badge,.tag){border-radius:var(--radius-chip)}
+          :is(button,.btn,.action-button,.primary-btn){min-height:44px;border-radius:var(--radius-button)}
+          :is(.btn-primary,.primary-btn,.action-button.primary,.tabs .btn.active){background:var(--primary);border-color:var(--primary);color:#fff}
+          :is(.btn-secondary,.secondary-btn){background:var(--surface);border:1px solid var(--line);color:var(--text)}
+          :is(.muted,.sub,.meta,.helper,.description){color:var(--text-sub)}
+          :is(.progress,.progress-track,.bar-track){background:var(--line);border-radius:999px;overflow:hidden}
+          :is(.progress i,.progress-fill,.bar-fill){background:var(--primary);border-radius:inherit}
+          :is(.study-toolbar,.study-progress-wrap,.study-bottom,.bottom-nav,.bottom-navigation){background:var(--surface);border-color:var(--line)}
+          :is(.study-title-block,.question-card,.study-content){padding-inline:20px}
+          :is(.study-title-block h2,#studyTitle,.question-card .question,.choice,.choice-item,.answer-choice){overflow-wrap:anywhere;word-break:keep-all;line-height:1.65}
+          :is(.choice,.choice-item,.answer-choice){min-height:60px;border:1.5px solid var(--line);border-radius:var(--radius-button);padding:14px 16px;background:var(--surface);color:var(--text)}
+          :is(.choice.selected,.choice-item.selected,.answer-choice.selected){border-color:var(--primary);background:var(--primary-soft)}
+          .hidden[hidden]{display:none!important}
+          @media(max-width:380px){#listPanel{padding-inline:20px}#listPanel .page-head{gap:8px}#listPanel .search-label{max-width:46%;padding:8px 10px}#listPanel .list-card{padding:14px}}
+          @media(min-width:680px){#listPanel .list{grid-template-columns:minmax(0,1fr)}}
+          @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+          @media(prefers-color-scheme:dark){:root[data-theme="dark"],:root.dark{--bg:#0B1220;--surface:#131C2E;--line:#223049;--text:#E5EAF3;--text-sub:#A8B4C8;--text-mute:#71809A;--primary:#3B82F6;--primary-soft:#172B4B;color-scheme:dark}}
+          """
+          after = before[:start] + css + before[close:]
+          new_start = after.find("const QUESTIONS=")
+          new_end = after.find("];", new_start) + 2
+          if after[new_start:new_end] != original_data:
+              raise SystemExit("Question payload changed; refusing commit")
+          if len(re.findall(r'&quot;id&quot;:', original_data)) != 3224:
+              raise SystemExit("Unexpected question count; refusing commit")
+          p.write_text(after, encoding="utf-8")
+          check = p.read_text(encoding="utf-8")
+          if check != after or check[new_start:new_end] != original_data:
+              raise SystemExit("Post-write validation failed")
+          print("Verified: CSS-only replacement; 3,224 question records preserved byte-for-byte.")
+          PY
+      - name: Commit exact requested change and remove runner
+        shell: bash
+        run: |
+          git rm .github/workflows/apply-v110-ui.yml
+          git add index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "v1.1.0: 디자인 시스템, 문제풀이, 오답노트, 통계, 설정 구현"
+          git push origin main
